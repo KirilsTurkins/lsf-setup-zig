@@ -1,0 +1,10 @@
+name: Validate XML parser security repair
+on:
+  push:
+    branches: [ci/fast-xml-parser-5.12.0-20261113]
+    paths: [.github/workflows/lsf-fast-xml-security.yml]
+permissions:
+  contents: write
+jobs:
+  repair:
+    uses: KirilsTurkins/latent-service-fabric/.github/workflows/ci-repair-owned-xml-action.yml@ae70d50f94b98eec2de216768a6115dbcbeb95cb
