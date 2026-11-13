@@ -1,0 +1,50 @@
+name: LSF XML parser security rebuild
+on:
+  push:
+    branches: [ci/fast-xml-5-12-20261113]
+    paths: [.github/workflows/lsf-xml-security-rebuild.yml]
+permissions:
+  contents: write
+concurrency:
+  group: lsf-xml-security-rebuild
+  cancel-in-progress: false
+jobs:
+  rebuild:
+    if: github.repository_owner == 'KirilsTurkins' && github.ref == 'refs/heads/ci/fast-xml-5-12-20261113'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      REVIEWED_BASE: e064b42fa88ad0859d8b54838b44f672ffd5ea7a
+      CI: 'true'
+    steps:
+      - uses: KirilsTurkins/lsf-checkout@4d310727149d3abacc52b5dcb0a1c4d18b345d13
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - uses: KirilsTurkins/lsf-setup-node@34275fdec80b5be172c3327cadef76aa2f3b31c6
+        with:
+          node-version: 24.19.0
+          package-manager-cache: false
+      - name: Authenticate the reviewed builder
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --max-time 120 --output "$RUNNER_TEMP/action_xml_repair.py" https://raw.githubusercontent.com/KirilsTurkins/latent-service-fabric/db897c6040a6cfba6c640e1c131f3cc696c3b471/.github/maintenance/action_xml_repair.py
+          echo "20adf50b22b5e073a66df345faa3006cd7f8ade086cf4311cf30fbae01b8cf05  $RUNNER_TEMP/action_xml_repair.py" | sha256sum --check --strict
+      - name: Rebuild and execute source and runtime regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/xml-repair-evidence"
+          python3 "$RUNNER_TEMP/action_xml_repair.py" build 2>&1 | tee "$RUNNER_TEMP/xml-repair-evidence/validation.log"
+      - name: Export verified objects without changing existing refs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 "$RUNNER_TEMP/action_xml_repair.py" upload
+      - uses: KirilsTurkins/lsf-upload-artifact@d74a697ce553b389f4219545e07c97fb8542c64f
+        if: always()
+        with:
+          name: xml-security-${{ github.event.repository.name }}
+          path: ${{ runner.temp }}/xml-repair-evidence/
+          if-no-files-found: error
+          retention-days: 7
