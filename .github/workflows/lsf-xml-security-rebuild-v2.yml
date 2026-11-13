@@ -1,0 +1,12 @@
+name: LSF XML parser security rebuild v2
+on:
+  push:
+    branches: [ci/fast-xml-5-12-20261113]
+    paths: [.github/workflows/lsf-xml-security-rebuild-v2.yml]
+permissions:
+  contents: write
+jobs:
+  verified:
+    uses: KirilsTurkins/latent-service-fabric/.github/workflows/action-xml-rebuild-owner.yml@2b71e6533c88829f7ee423048b46e7f07866cb42
+    with:
+      reviewed-base: e064b42fa88ad0859d8b54838b44f672ffd5ea7a
