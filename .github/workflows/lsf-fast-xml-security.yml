@@ -7,4 +7,4 @@ permissions:
   contents: write
 jobs:
   repair:
-    uses: KirilsTurkins/latent-service-fabric/.github/workflows/ci-repair-owned-xml-action.yml@ae70d50f94b98eec2de216768a6115dbcbeb95cb
+    uses: KirilsTurkins/latent-service-fabric/.github/workflows/ci-repair-owned-xml-action.yml@a69ece9fa7aee6b468b26c2aace0ff4cbf8c8942
